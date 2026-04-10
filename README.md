@@ -205,6 +205,32 @@ At inference time, predictions are accumulated step-by-step: the running sum of 
 
 ---
 
+## Citation
+
+If you use CLERNet in your research, please cite:
+
+```bibtex
+@inproceedings{DBLP:conf/ifaamas/SerinaCGPS25,
+  author       = {Lorenzo Serina and
+                  Mattia Chiari and
+                  Alfonso Emilio Gerevini and
+                  Luca Putelli and
+                  Ivan Serina},
+  title        = {Towards Efficient Online Goal Recognition through Deep Learning},
+  booktitle    = {Proceedings of the 24th International Conference on Autonomous Agents
+                  and Multiagent Systems, {AAMAS} 2025, Detroit, MI, USA, May 19-23,
+                  2025},
+  pages        = {1895--1903},
+  publisher    = {International Foundation for Autonomous Agents and Multiagent Systems
+                  / {ACM}},
+  year         = {2025},
+  url          = {https://dl.acm.org/doi/10.5555/3709347.3743826},
+  doi          = {10.5555/3709347.3743826},
+}
+```
+
+---
+
 ## Licensing and Credits
 
 Adapted and refactored from multiple upstream works to establish a clearer baseline for online Goal Recognition tasks.
