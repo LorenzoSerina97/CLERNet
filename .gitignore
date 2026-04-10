@@ -47,6 +47,7 @@ data/params_optuna/**/db/
 test_output/
 optuna_db/
 results/
+
 # Logs
 *.log
 
