@@ -46,7 +46,7 @@ data/params_optuna/**/db/
 # Training output directories
 test_output/
 optuna_db/
-
+results/
 # Logs
 *.log
 

@@ -24,6 +24,10 @@ dependencies = [
     "ipykernel"
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
 [project.scripts]
 clernet-train = "src.training.train:run"
 clernet-test  = "src.cli.test_model:run_test"

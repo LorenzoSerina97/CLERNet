@@ -177,6 +177,49 @@ def _parse_obs(obs_text: str) -> list:
     return actions
 
 
+def _parse_hyps(hyps_text: str, goal_vocab: dict) -> list:
+    """Parse hyps.dat into a list of candidate hypotheses.
+
+    Each line of ``hyps.dat`` is one hypothesis with comma-separated predicates,
+    e.g. ``(ON A K), (ON B H), ...``.
+
+    Args:
+        hyps_text: Raw text content of ``hyps.dat``.
+        goal_vocab: Predicate string → one-hot vector mapping.
+
+    Returns:
+        List of hypotheses; each hypothesis is a sorted list of goal vocab indices.
+    """
+    hypotheses = []
+    for line in hyps_text.strip().splitlines():
+        predicates = [
+            token.strip().strip("()").strip().lower()
+            for token in line.split(",")
+        ]
+        mask = _goal_mask([p for p in predicates if p], goal_vocab)
+        indices = sorted(np.where(mask > 0)[0].tolist())
+        if indices:
+            hypotheses.append(indices)
+    return hypotheses
+
+
+def _find_correct_hyp_idx(goal_vector: np.ndarray, possible_goals: list) -> int:
+    """Return the index of the hypothesis that matches the true goal vector.
+
+    Args:
+        goal_vector: Binary array of shape ``(n_goals,)`` for the true goal.
+        possible_goals: List of hypotheses, each a list of goal vocab indices.
+
+    Returns:
+        Index into ``possible_goals``, or ``-1`` if no match found.
+    """
+    correct_set = set(np.where(goal_vector > 0)[0].tolist())
+    for i, hyp in enumerate(possible_goals):
+        if set(hyp) == correct_set:
+            return i
+    return -1
+
+
 def _parse_real_hyp(real_hyp_text: str) -> list:
     """Parse real_hyp.dat content into lowercase predicate strings.
 
@@ -239,7 +282,7 @@ def evaluate_instance(
     action_vocab: dict,
     goal_vocab: dict,
     max_plan_dim: int,
-) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+) -> Tuple:
     """Run the model on a single ZIP test instance.
 
     Args:
@@ -250,16 +293,20 @@ def evaluate_instance(
         max_plan_dim: Sequence length expected by the model.
 
     Returns:
-        Tuple ``(y_pred_steps, y_true_steps)`` each of shape
-        ``(obs_len, n_goals)``, or ``(None, None)`` on parse failure.
+        Tuple ``(y_pred_steps, y_true_steps, possible_goals, correct_hyp_idx)``
+        where ``y_pred_steps`` and ``y_true_steps`` have shape ``(obs_len, n_goals)``,
+        ``possible_goals`` is a list of hypothesis index lists parsed from ``hyps.dat``,
+        and ``correct_hyp_idx`` is the index of the true goal in ``possible_goals``
+        (or ``-1`` if not found).  Returns ``(None, None, None, None)`` on parse failure.
     """
     with zipfile.ZipFile(zip_path) as z:
         obs_text = z.read("obs.dat").decode("utf-8")
         real_hyp_text = z.read("real_hyp.dat").decode("utf-8")
+        hyps_text = z.read("hyps.dat").decode("utf-8")
 
     actions = _parse_obs(obs_text)
     if not actions:
-        return None, None
+        return None, None, None, None
 
     obs_len = min(len(actions), max_plan_dim)
     x = _encode_actions(actions, action_vocab, max_plan_dim)
@@ -267,13 +314,16 @@ def evaluate_instance(
     goal_predicates = _parse_real_hyp(real_hyp_text)
     goal_vector = _goal_mask(goal_predicates, goal_vocab)
 
+    possible_goals = _parse_hyps(hyps_text, goal_vocab)
+    correct_hyp_idx = _find_correct_hyp_idx(goal_vector, possible_goals)
+
     # Predict: input shape (1, max_plan_dim), output (1, max_plan_dim, n_goals)
     y_pred = model.predict(x[np.newaxis, :], verbose=0)[0]  # (max_plan_dim, n_goals)
 
     # Ground truth: same goal vector at every observed step
     y_true = np.tile(goal_vector, (obs_len, 1))  # (obs_len, n_goals)
 
-    return y_pred[:obs_len], y_true
+    return y_pred[:obs_len], y_true, possible_goals, correct_hyp_idx
 
 
 def _compute_weighted_metrics(y_pred_steps: np.ndarray, y_true_steps: np.ndarray) -> dict:
@@ -305,6 +355,53 @@ def _compute_weighted_metrics(y_pred_steps: np.ndarray, y_true_steps: np.ndarray
         "accuracy": sum(a * w for a, w in zip(acc_track, weights)) / w_sum,
         "hamming": sum(h * w for h, w in zip(ham_track, weights)) / w_sum,
     }
+
+
+def _compute_rf_cv(
+    y_pred_steps: np.ndarray,
+    possible_goals: list,
+    correct_hyp_idx: int,
+) -> dict:
+    """Compute RF (Ranked First) and CV (Convergence) for one instance.
+
+    At each step the cumulative sum of predictions is used to score every
+    candidate hypothesis; the hypothesis with the highest score is selected.
+
+    - **RF**: fraction of steps where the selected hypothesis is the correct one.
+    - **CV**: fraction of steps covered by the longest correct trailing suffix,
+      i.e. ``(n - t*) / n`` where ``t*`` is the earliest step from which the
+      model selects the correct hypothesis without ever switching away.
+
+    Args:
+        y_pred_steps: Raw per-fluent predictions, shape ``(obs_len, n_goals)``.
+        possible_goals: List of hypotheses, each a list of goal vocab indices.
+        correct_hyp_idx: Index of the true hypothesis in ``possible_goals``.
+
+    Returns:
+        Dict with keys ``rf`` and ``cv``.
+    """
+    running = np.zeros(y_pred_steps.shape[-1])
+    step_correct = []
+
+    for t in range(len(y_pred_steps)):
+        running += y_pred_steps[t]
+        scores = [float(np.sum(running[hyp])) for hyp in possible_goals]
+        selected = int(np.argmax(scores))
+        step_correct.append(1 if selected == correct_hyp_idx else 0)
+
+    n = len(step_correct)
+    rf = sum(step_correct) / n if n else 0.0
+
+    # Find earliest step of the final correct streak
+    t_star = n
+    for t in range(n - 1, -1, -1):
+        if step_correct[t] == 1:
+            t_star = t
+        else:
+            break
+    cv = (n - t_star) / n if n else 0.0
+
+    return {"rf": rf, "cv": cv}
 
 
 # ---------------------------------------------------------------------------
@@ -382,7 +479,7 @@ def run_test(
     all_metrics = []
     for idx, zf in enumerate(zip_files, 1):
         zip_path = join(zip_dir, zf)
-        y_pred_steps, y_true_steps = evaluate_instance(
+        y_pred_steps, y_true_steps, possible_goals, correct_hyp_idx = evaluate_instance(
             zip_path, model, action_vocab, goal_vocab, max_plan_dim
         )
         if y_pred_steps is None:
@@ -390,26 +487,35 @@ def run_test(
             continue
 
         m = _compute_weighted_metrics(y_pred_steps, y_true_steps)
+        if possible_goals and correct_hyp_idx != -1:
+            m.update(_compute_rf_cv(y_pred_steps, possible_goals, correct_hyp_idx))
+        else:
+            m["rf"] = float("nan")
+            m["cv"] = float("nan")
+
         all_metrics.append(m)
         print(
-            f"[{idx:2d}/{len(zip_files)}] {zf[:55]:<55}  "
-            f"F1={m['f1']:.3f}  Acc={m['accuracy']:.3f}  Ham={m['hamming']:.3f}"
+            f"[{idx:2d}/{len(zip_files)}] {zf[:50]:<50}  "
+            f"F1={m['f1']:.3f}  Acc={m['accuracy']:.3f}  Ham={m['hamming']:.3f}  "
+            f"RF={m['rf']:.3f}  CV={m['cv']:.3f}"
         )
 
     if not all_metrics:
         print("No valid results.")
         return
 
-    avg_f1 = sum(m["f1"] for m in all_metrics) / len(all_metrics)
-    avg_acc = sum(m["accuracy"] for m in all_metrics) / len(all_metrics)
-    avg_ham = sum(m["hamming"] for m in all_metrics) / len(all_metrics)
+    def _avg(key):
+        vals = [m[key] for m in all_metrics if not (isinstance(m[key], float) and m[key] != m[key])]
+        return sum(vals) / len(vals) if vals else float("nan")
 
     summary_lines = [
         "",
         f"=== Summary over {len(all_metrics)} instances ===",
-        f"  Weighted avg F1:           {avg_f1:.4f}",
-        f"  Weighted avg Accuracy:     {avg_acc:.4f}",
-        f"  Weighted avg Hamming Loss: {avg_ham:.4f}",
+        f"  Weighted avg F1:           {_avg('f1'):.4f}",
+        f"  Weighted avg Accuracy:     {_avg('accuracy'):.4f}",
+        f"  Weighted avg Hamming Loss: {_avg('hamming'):.4f}",
+        f"  Avg RF (Ranked First):     {_avg('rf'):.4f}",
+        f"  Avg CV (Convergence):      {_avg('cv'):.4f}",
     ]
     for line in summary_lines:
         print(line)
