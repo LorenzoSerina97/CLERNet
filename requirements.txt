@@ -1,0 +1,10 @@
+tensorflow
+keras
+optuna
+optuna-integration
+matplotlib
+scikit-learn
+click
+numpy
+jupyter
+ipykernel

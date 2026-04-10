@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clernet-goal-recognition"
+version = "0.1.0"
+description = "CLERNet Online Goal Recognition framework"
+authors = [
+    { name="Authors" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "tensorflow",
+    "keras",
+    "optuna",
+    "optuna-integration",
+    "matplotlib",
+    "scikit-learn",
+    "click",
+    "numpy",
+    "jupyter",
+    "ipykernel"
+]
+
+[project.scripts]
+clernet-train = "src.training.train:run"
+clernet-test  = "src.cli.test_model:run_test"

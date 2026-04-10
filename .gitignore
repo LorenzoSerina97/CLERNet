@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific: large data files (training data is not tracked)
+data/training_data/**/*.json
+data/training_data/**/*.pkl
+
+# Trained models (too large for git; use Git LFS or DVC if needed)
+models/*.keras
+models/*.h5
+
+# Optuna databases
+*.db
+data/params_optuna/**/db/
+
+# Training output directories
+test_output/
+optuna_db/
+
+# Logs
+*.log
+
+# Coverage
+.coverage
+htmlcov/

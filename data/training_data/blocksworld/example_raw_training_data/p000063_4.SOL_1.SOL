@@ -1,0 +1,53 @@
+
+; Version LPG-td-1.4
+; Seed 71245407
+; Command line: /data/storage/users/lserina/OnlineGR/goal_recognition_no_loops/tmp/p000063_solver -o /data/storage/users/lserina/OnlineGR/data/plans/blocksworld/plans/domain.pddl -f /data/storage/users/lserina/OnlineGR/data/plans/blocksworld/plans/p000063.pddl -input_plan /data/storage/users/lserina/OnlineGR/goal_recognition_no_loops/data/file_soluzioni/blocksworld/soluzioni_train/p000063_4.SOL -n 1 -xml_info 1 -out /data/storage/users/lserina/OnlineGR/goal_recognition_no_loops/data/dataset/opz_11/blocksworld/train/p000063_4.SOL -goal_regression 11 
+; Problem /data/storage/users/lserina/OnlineGR/data/plans/blocksworld/plans/p000063.pddl
+; Time 0.03
+; Search time 0.03
+; Parsing time 0.00
+; Mutex time 0.00
+; NrActions 38
+
+; Distance from input plan: 0 
+
+0.0002:   (UNSTACK M B) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+1.0005:   (PUTDOWN M) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+2.0008:   (UNSTACK B U) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+3.0010:   (PUTDOWN B) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+4.0012:   (UNSTACK U I) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+5.0015:   (PUTDOWN U) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+6.0017:   (UNSTACK I F) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+7.0020:   (PUTDOWN I) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+8.0022:   (UNSTACK F N) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+9.0025:   (PUTDOWN F) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+10.0027:   (UNSTACK N R) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+11.0030:   (STACK N F) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+12.0032:   (UNSTACK R T) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+13.0035:   (PUTDOWN R) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+14.0037:   (UNSTACK T W) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+15.0040:   (PUTDOWN T) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+16.0042:   (UNSTACK J K) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+17.0045:   (PUTDOWN J) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+18.0047:   (PICKUP R) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+19.0050:   (STACK R J) [1.0000];;(:metadata <ActGoals><Goal>(on r j)</Goal></ActGoals>)
+20.0052:   (PICKUP M) [1.0000];;(:metadata <ActGoals><Goal>(on m r)</Goal></ActGoals>)
+21.0055:   (STACK M R) [1.0000];;(:metadata <ActGoals><Goal>(on m r)</Goal></ActGoals>)
+22.0057:   (PICKUP I) [1.0000];;(:metadata <ActGoals><Goal>(on i m)</Goal></ActGoals>)
+23.0060:   (STACK I M) [1.0000];;(:metadata <ActGoals><Goal>(on i m)</Goal></ActGoals>)
+24.0062:   (PICKUP B) [1.0000];;(:metadata <ActGoals><Goal>(on b i)</Goal></ActGoals>)
+25.0065:   (STACK B I) [1.0000];;(:metadata <ActGoals><Goal>(on b i)</Goal></ActGoals>)
+26.0067:   (PICKUP K) [1.0000];;(:metadata <ActGoals><Goal>(on k b)</Goal></ActGoals>)
+27.0070:   (STACK K B) [1.0000];;(:metadata <ActGoals><Goal>(on k b)</Goal></ActGoals>)
+28.0072:   (PICKUP T) [1.0000];;(:metadata <ActGoals><Goal>(on t k)</Goal></ActGoals>)
+29.0075:   (STACK T K) [1.0000];;(:metadata <ActGoals><Goal>(on t k)</Goal></ActGoals>)
+30.0077:   (UNSTACK N F) [1.0000];;(:metadata <ActGoals><Goal>(on n t)</Goal></ActGoals>)
+31.0080:   (STACK N T) [1.0000];;(:metadata <ActGoals><Goal>(on n t)</Goal></ActGoals>)
+32.0082:   (PICKUP U) [1.0000];;(:metadata <ActGoals><Goal>(on u n)</Goal></ActGoals>)
+33.0085:   (STACK U N) [1.0000];;(:metadata <ActGoals><Goal>(on u n)</Goal></ActGoals>)
+34.0088:   (PICKUP W) [1.0000];;(:metadata <ActGoals><Goal>(on w u)</Goal></ActGoals>)
+35.0090:   (STACK W U) [1.0000];;(:metadata <ActGoals><Goal>(on w u)</Goal></ActGoals>)
+36.0093:   (PICKUP F) [1.0000];;(:metadata <ActGoals><Goal>(on f w)</Goal></ActGoals>)
+37.0095:   (STACK F W) [1.0000];;(:metadata <ActGoals><Goal>(on f w)</Goal></ActGoals>)
+
+
