@@ -10,7 +10,7 @@ dist/
 build/
 *.whl
 .eggs/
-
+src/clernet_goal_recognition.egg-info
 # Virtual environments
 .venv/
 venv/
